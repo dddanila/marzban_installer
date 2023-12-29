@@ -72,7 +72,8 @@ function install()
     echo "JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 1440" >> .env
     docker-compose build
     docker-compose up -d
-    sleep 5
+    echo "Запуск..."
+    sleep 15
 }
 
 function download_032()
