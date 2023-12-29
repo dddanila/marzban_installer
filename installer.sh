@@ -11,6 +11,7 @@ wget -qO- https://bootstrap.pypa.io/get-pip.py | python3 -
 alembic upgrade head
 sudo ln -s $(pwd)/marzban-cli.py /usr/bin/marzban-cli
 sudo chmod +x /usr/bin/marzban-cli
+clear
 read -p "Enter username: " username
 read -p "Enter password: " password
 cp .env.example .env
