@@ -82,6 +82,7 @@ function download_032()
     tar -xf v0.3.2.tar.gz
     rm -rf v0.3.2.tar.gz
     cd Marzban-0.3.2/
+    sed -i "s/latest/0.3.2/" docker-compose.yml
     install;
 }
 
