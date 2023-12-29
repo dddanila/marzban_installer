@@ -82,7 +82,7 @@ function download_032()
     tar -xf v0.3.2.tar.gz
     rm -rf v0.3.2.tar.gz
     cd Marzban-0.3.2/
-    sed -i "s/latest/0.3.2/" docker-compose.yml
+    sed -i "s/latest/v0.3.2/" docker-compose.yml
     install;
 }
 
@@ -95,7 +95,7 @@ function download_latest()
 
 clear
 printf "#########Установка Marzban#########\n"
-printf "1) Установить Marzban-0.3.2\n"
+printf "1) Установить Marzban-v0.3.2\n"
 printf "2) Установить Marzban-Latest\n"
 printf "0) Отмена\n\n"
 read -p "> " CMD
