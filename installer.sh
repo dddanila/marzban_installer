@@ -99,8 +99,8 @@ printf "0) Отмена\n\n"
 read -p "> " CMD
 
 sudo apt-get update && sudo apt-get upgrade -y
-export DEBIAN_FRONTEND=noninteractive
-sudo apt-get install --assume-yes libpq-dev
+sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf 
+echo "\$nrconf{restart} = 'a';" >> /etc/needrestart/needrestart.conf 
 sudo apt-get install --assume-yes git
 sudo apt-get --assume-yes install apt-transport-https ca-certificates gnupg2 software-properties-common
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key add -
