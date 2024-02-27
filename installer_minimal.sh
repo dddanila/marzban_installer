@@ -104,4 +104,3 @@ echo "Username: $username" >> ~/token.txt
 echo "Password: $password" >> ~/token.txt
 echo "Token: $TOKEN" >> ~/token.txt
 clear
-cat token.txt
