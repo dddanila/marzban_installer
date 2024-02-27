@@ -42,25 +42,10 @@ function install()
     alembic upgrade head
     sudo ln -s $(pwd)/marzban-cli.py /usr/bin/marzban-cli
     sudo chmod +x /usr/bin/marzban-cli
-    clear
-    read -p "Enter username: " username
-    read -p "Enter password: " password
-    
-    if [[ -z $username ]]
-      then
-          username="admin"
-          printf "Имя пользователя: $username\n"
-      else
-          printf "Имя пользователя введено.\n"
-    fi
-
-    if [[ -z $password ]]
-      then
-          password="$(password_generate)"
-          printf "Сгенерирован пароль: $password\n"
-      else
-          printf "Пароль введен.\n"
-    fi
+    username="admin"
+    printf "Имя пользователя: $username\n"
+    password="$(password_generate)"
+    printf "Сгенерирован пароль: $password\n"
     cp .env.example .env
     echo "SUDO_USERNAME = $username" >> .env
     echo "SUDO_PASSWORD = $password" >> .env
