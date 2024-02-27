@@ -100,7 +100,7 @@ TOKEN=$(curl -X "POST" \
   -d "grant_type=&username=$username&password=$password&scope=&client_id=&client_secret=")
 
 TOKEN=$(parse_json $TOKEN access_token)
+clear
 echo "Username: $username" >> ~/token.txt
 echo "Password: $password" >> ~/token.txt
 echo "Token: $TOKEN" >> ~/token.txt
-printf "TOKEN:\n$TOKEN\n"
