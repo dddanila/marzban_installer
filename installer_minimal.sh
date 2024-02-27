@@ -1,4 +1,38 @@
-#!/bin/bash
+!/bin/bash
+
+function parse_json()
+{
+    echo $1 | \
+    sed -e 's/[{}]/''/g' | \
+    sed -e 's/", "/'\",\"'/g' | \
+    sed -e 's/" ,"/'\",\"'/g' | \
+    sed -e 's/" , "/'\",\"'/g' | \
+    sed -e 's/","/'\"---SEPERATOR---\"'/g' | \
+    awk -F=':' -v RS='---SEPERATOR---' "\$1~/\"$2\"/ {print}" | \
+    sed -e "s/\"$2\"://" | \
+    tr -d "\n\t" | \
+    sed -e 's/\\"/"/g' | \
+    sed -e 's/\\\\/\\/g' | \
+    sed -e 's/^[ \t]*//g' | \
+    sed -e 's/^"//'  -e 's/"$//'
+}
+
+
+function password_generate()
+{
+    SYMBOLS=""
+    for symbol in {A..Z} {a..z} {0..9}; do SYMBOLS=$SYMBOLS$symbol; done
+    SYMBOLS=$SYMBOLS''
+    PWD_LENGTH=16
+    PASSWORD=""
+    RANDOM=256
+    for i in `seq 1 $PWD_LENGTH`
+    do
+    PASSWORD=$PASSWORD${SYMBOLS:$(expr $RANDOM % ${#SYMBOLS}):1}
+    done
+    echo $PASSWORD
+}
+
 
 function install()
 {
@@ -8,16 +42,38 @@ function install()
     alembic upgrade head
     sudo ln -s $(pwd)/marzban-cli.py /usr/bin/marzban-cli
     sudo chmod +x /usr/bin/marzban-cli
-}
+    clear
+    read -p "Enter username: " username
+    read -p "Enter password: " password
+    
+    if [[ -z $username ]]
+      then
+          username="admin"
+          printf "Имя пользователя: $username\n"
+      else
+          printf "Имя пользователя введено.\n"
+    fi
 
-function download_032()
-{
-    wget https://github.com/Gozargah/Marzban/archive/refs/tags/v0.3.2.tar.gz
-    tar -xf v0.3.2.tar.gz
-    rm -rf v0.3.2.tar.gz
-    cd Marzban-0.3.2/
-    sed -i "s/latest/v0.3.2/" docker-compose.yml
-    install;
+    if [[ -z $password ]]
+      then
+          password="$(password_generate)"
+          printf "Сгенерирован пароль: $password\n"
+      else
+          printf "Пароль введен.\n"
+    fi
+    cp .env.example .env
+    echo "SUDO_USERNAME = $username" >> .env
+    echo "SUDO_PASSWORD = $password" >> .env
+    echo "SQLALCHEMY_DATABASE_URL = 'sqlite:///db.sqlite3'" >> .env
+    echo "DOCS=true" >> .env
+    echo "WEBHOOK_ADDRESS = 'http://0.0.0.0:9000/'" >> .env
+    echo "WEBHOOK_SECRET = 'something-very-very-secret'" >> .env
+    echo "VITE_BASE_API='https://0.0.0.0:8000/api/'" >> .env
+    echo "JWT_ACCESS_TOKEN_EXPIRE_MINUTES = 5184000" >> .env
+    docker-compose build
+    docker-compose up -d
+    echo "Запуск..."
+    sleep 15
 }
 
 function download_latest()
@@ -28,12 +84,6 @@ function download_latest()
 }
 
 clear
-printf "#########Установка Marzban(minimal)#########\n"
-printf "1) Скачать Marzban-v0.3.2\n"
-printf "2) Скачать Marzban-Latest\n"
-printf "0) Отмена\n\n"
-read -p "> " CMD
-
 sudo apt-get update && sudo apt-get upgrade -y
 sed -i "s/#\$nrconf{restart} = 'i';/\$nrconf{restart} = 'a';/" /etc/needrestart/needrestart.conf 
 echo "\$nrconf{restart} = 'a';" >> /etc/needrestart/needrestart.conf 
@@ -56,8 +106,16 @@ chmod +x /usr/local/bin/docker-compose
 systemctl start docker
 systemctl enable docker
 
-case $CMD in
-  1) download_032;;
-  2) download_latest;;
-  *) exit 0;; 
-esac
+download_latest;
+
+TOKEN=$(curl -X "POST" \
+  "http://127.0.0.1:8000/api/admin/token" \
+  -H "accept: application/json" \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "grant_type=&username=$username&password=$password&scope=&client_id=&client_secret=")
+
+TOKEN=$(parse_json $TOKEN access_token)
+echo "Username: $username" >> ~/token.txt
+echo "Password: $password" >> ~/token.txt
+echo "Token: $TOKEN" >> ~/token.txt
+printf "TOKEN:\n$TOKEN\n"
